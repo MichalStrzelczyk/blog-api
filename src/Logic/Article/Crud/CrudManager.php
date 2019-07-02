@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Logic\Article\Crud;
 
 class CrudManager {
-
     /** @var \Repository\Article\Postgresql\PostgresqlEntity  */
     protected $articleRepository;
 
@@ -46,9 +45,9 @@ class CrudManager {
      *
      * @param int $articleId
      *
-     * @return \Data\Article\ArticleEntity
-     *
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
+     *
+     * @return \Data\Article\ArticleEntity
      */
     public function read(int $articleId): \Data\Article\ArticleEntity {
         /** @var \Data\Article\ArticleEntity $article */
@@ -65,9 +64,9 @@ class CrudManager {
      * @param int $articleId
      * @param array $data
      *
-     * @return \Data\Article\ArticleEntity
-     *
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
+     *
+     * @return \Data\Article\ArticleEntity
      */
     public function update(int $articleId, array $data): \Data\Article\ArticleEntity {
         $article = $this->read($articleId);
@@ -92,13 +91,11 @@ class CrudManager {
      *
      * @param int $articleId
      *
-     * @return \Maleficarum\Storage\Repository\ModelInterface
-     *
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
      */
-    public function delete(int $articleId) {
+    public function delete(int $articleId): void {
         $article = $this->read($articleId);
 
-        return $this->articleRepository->delete($article);
+        $this->articleRepository->delete($article);
     }
 }

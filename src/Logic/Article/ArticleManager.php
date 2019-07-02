@@ -4,17 +4,16 @@ declare(strict_types=1);
 namespace Logic\Article;
 
 class ArticleManager {
-
-    /** @var \Repository\Article\Postgresql\PostgresqlCollection  */
+    /** @var \Repository\Article\Postgresql\PostgresqlCollection */
     protected $articleCollectionRepository;
 
-    /** @var \Repository\Article\Postgresql\PostgresqlEntity  */
+    /** @var \Repository\Article\Postgresql\PostgresqlEntity */
     protected $articleEntityRepository;
 
-    /** @var \Repository\ArticleToCategory\Postgresql\PostgresqlCollection  */
+    /** @var \Repository\ArticleToCategory\Postgresql\PostgresqlCollection */
     protected $articleToCategoryCollectionRepository;
 
-    /** @var Crud\CrudManager  */
+    /** @var Crud\CrudManager */
     protected $articleCrudManager;
 
     /**
@@ -42,7 +41,7 @@ class ArticleManager {
      * @param int $offset
      * @param array $sorting
      * @param array $filters
-     * 
+     *
      * @return \Data\Article\ArticleCollection
      */
     public function list($limit = 100, $offset = 0, $sorting = [], $filters = []): \Data\Article\ArticleCollection {
@@ -72,14 +71,14 @@ class ArticleManager {
     /**
      * Assign article to category
      *
-     * @param $articleId
-     * @param $categoryIds
-     *
-     * @return \Maleficarum\Storage\Repository\CollectionInterface
+     * @param int $articleId
+     * @param array $categoryIds
      *
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
+     *
+     * @return \Data\ArticleToCategory\ArticleToCategoryCollection
      */
-    public function assignToCategories($articleId, $categoryIds) {
+    public function assignToCategories(int $articleId, array $categoryIds): \Data\ArticleToCategory\ArticleToCategoryCollection {
         $article = $this->articleCrudManager->read($articleId);
         $articleToCategoryCollection = \Maleficarum\Ioc\Container::get(\Data\ArticleToCategory\ArticleToCategoryCollection::class);
         $parameters = [
@@ -94,10 +93,10 @@ class ArticleManager {
             $articleToCategoryCollection->count() > 0 and $this->articleToCategoryCollectionRepository->deleteAll($articleToCategoryCollection);
 
             $data = [];
-            \array_filter($categoryIds, function ($row) use (&$data, $article) {
+            \array_filter($categoryIds, function ($categoryId) use (&$data, $article) {
                 $data[] = [
                     'mapArticleCategoryArticleId' => $article->getArticleId(),
-                    'mapArticleCategoryCategoryId' => $row,
+                    'mapArticleCategoryCategoryId' => $categoryId,
                 ];
             });
 
