@@ -3,10 +3,7 @@ declare(strict_types=1);
 
 namespace Controller\Article;
 
-/**
- * This controller handles status reporting
- */
-class Controller extends \Maleficarum\Api\Controller\Generic {
+class ArticleController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
@@ -15,8 +12,8 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
      */
     protected static $sortMap = [
         'listAction' => [
-            '-status' => [['articleActive', 'DESC']],
-            '+status' => [['articleActive', 'ASC']],
+            '-status' => [['articleStatus', 'DESC']],
+            '+status' => [['articleStatus', 'ASC']],
             '-date' => [['articleCreatedDate', 'DESC']],
             '+date' => [['articleCreatedDate', 'ASC']],
             '-id' => [['articleId', 'DESC']],
@@ -32,9 +29,9 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
     /**
      * @param \Logic\Article\ArticleManager $articleCrudManager
      *
-     * @return \Controller\Article\Controller
+     * @return \Controller\Article\ArticleController
      */
-    public function setArticleManager(\Logic\Article\ArticleManager $articleManager): Controller {
+    public function setArticleManager(\Logic\Article\ArticleManager $articleManager): ArticleController {
         $this->articleManager = $articleManager;
 
         return $this;
@@ -57,11 +54,11 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
 
         // Filters
         $filters = [];
-        if (isset($status) && !\in_array((int)$status, [0, 1])) {
+        if ($status  && !\in_array($status, ['0', '1'])) {
             $this->addError('0001-000103', 'Invalid `status` parameter - unsupported value.');
             $this->respondToBadRequest($this->getAllErrors());
-        } else{
-            $filters['articleActive'] = $status;
+        } else {
+            $status and $filters['articleStatus'] = $status;
         }
 
         $articles = $this->articleManager->list(
@@ -76,16 +73,13 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
 
     /**
      * @param string $method
-     *
-     * @return bool|mixed
      */
-    public function __remap(string $method) {
+    public function __remap(string $method): void {
         try {
             $action = $method . 'Action';
 
             /**
-             * Checking ACL code here
-             *
+             * Checking ACL
              * throw \Maleficarum\Exception\UnauthorizedException when user doesn't have access to action
              */
             if (\method_exists($this, $action)) {
@@ -104,7 +98,5 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
 
             throw new \Maleficarum\Exception\HttpException(500, 'Generic error - please check logfile for more information. Error nr: ' . $e->errorId);
         }
-
-        return true;
     }
 }

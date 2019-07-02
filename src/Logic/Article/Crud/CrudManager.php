@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace Logic\Article\Crud;
 
-class Manager {
-    /**
-     * @var \Repository\Article\Postgresql\PostgresqlEntity
-     */
+class CrudManager {
+
+    /** @var \Repository\Article\Postgresql\PostgresqlEntity  */
     protected $articleRepository;
 
     /**
@@ -23,16 +22,17 @@ class Manager {
      *
      * @param array $data
      *
-     * @return \Data\Article\Entity
+     * @return \Data\Article\ArticleEntity
      */
-    public function create(array $data): \Data\Article\Entity {
-        /** @var \Data\Article\Entity $article */
-        $article = \Maleficarum\Ioc\Container::get(\Data\Article\Entity::class);
+    public function create(array $data): \Data\Article\ArticleEntity {
+        /** @var \Data\Article\ArticleEntity $article */
+        $article = \Maleficarum\Ioc\Container::get(\Data\Article\ArticleEntity::class);
         $article->merge($data);
         $article->setArticleCreatedDate(date('Y-m-d H:i:s'));
-        $article->setArticleActive(\Data\Article\Entity::STATUS_ACTIVE);
+        $article->setarticleStatus(\Data\Article\ArticleEntity::STATUS_ACTIVE);
 
-        if (!$article->validate()) {
+        \Data\Article\ArticleValidator::validate($article->getDTO(), $article);
+        if ($article->hasErrors()) {
             throw new \Logic\Exception\EntityValidationError($article->getAllErrors());
         }
 
@@ -46,13 +46,13 @@ class Manager {
      *
      * @param int $articleId
      *
-     * @return \Data\Article\Entity
+     * @return \Data\Article\ArticleEntity
      *
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
      */
-    public function read(int $articleId): \Data\Article\Entity {
-        /** @var \Data\Article\Entity $article */
-        $article = \Maleficarum\Ioc\Container::get(\Data\Article\Entity::class);
+    public function read(int $articleId): \Data\Article\ArticleEntity {
+        /** @var \Data\Article\ArticleEntity $article */
+        $article = \Maleficarum\Ioc\Container::get(\Data\Article\ArticleEntity::class);
         $article->setId($articleId);
         $this->articleRepository->read($article);
 
@@ -65,11 +65,11 @@ class Manager {
      * @param int $articleId
      * @param array $data
      *
-     * @return \Data\Article\Entity
+     * @return \Data\Article\ArticleEntity
      *
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
      */
-    public function update(int $articleId, array $data): \Data\Article\Entity {
+    public function update(int $articleId, array $data): \Data\Article\ArticleEntity {
         $article = $this->read($articleId);
 
         // This properties shouldn't be changed
@@ -77,7 +77,8 @@ class Manager {
         unset($data['articleId']);
 
         $article->merge($data);
-        if (!$article->validate()) {
+        \Data\Article\ArticleValidator::validate($article->getDTO(), $article);
+        if ($article->hasErrors()) {
             throw new \Logic\Exception\EntityValidationError($article->getAllErrors());
         }
 

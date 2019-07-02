@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
- 
+
 // initialize time profiling
 $start = \microtime(true);
  

@@ -3,11 +3,6 @@ declare(strict_types=1);
 
 namespace Controller;
 
-/**
- * Trait HttpErrorFormatterTrait
- *
- * @package Controller
- */
 trait HttpErrorFormatterTrait {
     /**
      * We log everything what we can for further investigation

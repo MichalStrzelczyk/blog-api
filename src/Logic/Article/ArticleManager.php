@@ -3,58 +3,49 @@ declare(strict_types=1);
 
 namespace Logic\Article;
 
-/**
- * Class Manager
- *
- * @package Logic\Article
- */
-class Manager {
-    /**
-     * @var \Repository\Article\Postgresql\Collection
-     */
+class ArticleManager {
+
+    /** @var \Repository\Article\Postgresql\PostgresqlCollection  */
     protected $articleCollectionRepository;
 
-    /**
-     * @var \Repository\Article\Postgresql\PostgresqlEntity
-     */
+    /** @var \Repository\Article\Postgresql\PostgresqlEntity  */
     protected $articleEntityRepository;
 
-    /**
-     * @var \Repository\ArticleToCategory\Postgresql\PostgresqlCollection
-     */
-    protected $articleToCatoryCollectionRepository;
+    /** @var \Repository\ArticleToCategory\Postgresql\PostgresqlCollection  */
+    protected $articleToCategoryCollectionRepository;
 
-    /**
-     * @var Crud\Manager
-     */
+    /** @var Crud\CrudManager  */
     protected $articleCrudManager;
 
     /**
-     * Manager constructor.
+     * ArticleManager constructor.
      *
-     * @param \Repository\Article\Postgresql\Collection $articleRepository
+     * @param Crud\CrudManager $articleCrudManager
+     * @param \Repository\Article\Postgresql\PostgresqlEntity $articleEntityRepository
+     * @param \Repository\Article\Postgresql\PostgresqlCollection $articleCollectionRepository
+     * @param \Repository\ArticleToCategory\Postgresql\PostgresqlCollection $articleToCategoryCollectionRepository
      */
     public function __construct(
-        \Logic\Article\Crud\Manager $articleCrudManager,
+        \Logic\Article\Crud\CrudManager $articleCrudManager,
         \Repository\Article\Postgresql\PostgresqlEntity $articleEntityRepository,
-        \Repository\Article\Postgresql\Collection $articleCollectionRepository,
-        \Repository\ArticleToCategory\Postgresql\PostgresqlCollection $articleToCatoryCollectionRepository
+        \Repository\Article\Postgresql\PostgresqlCollection $articleCollectionRepository,
+        \Repository\ArticleToCategory\Postgresql\PostgresqlCollection $articleToCategoryCollectionRepository
     ) {
         $this->articleCrudManager = $articleCrudManager;
         $this->articleCollectionRepository = $articleCollectionRepository;
         $this->articleEntityRepository = $articleEntityRepository;
-        $this->articleToCatoryCollectionRepository = $articleToCatoryCollectionRepository;
+        $this->articleToCategoryCollectionRepository = $articleToCategoryCollectionRepository;
     }
 
     /**
-     * List all articles
-     *
-     * @param array $parameters
-     * @param array $subset
-     *
-     * @return \Data\Article\Collection
+     * @param int $limit
+     * @param int $offset
+     * @param array $sorting
+     * @param array $filters
+     * 
+     * @return \Data\Article\ArticleCollection
      */
-    public function list($limit = 100, $offset = 0, $sorting = [], $filters = []): \Data\Article\Collection {
+    public function list($limit = 100, $offset = 0, $sorting = [], $filters = []): \Data\Article\ArticleCollection {
         $parameters = [
             '__subset' => [
                 'limit' => $limit,
@@ -72,7 +63,7 @@ class Manager {
             }
         }
 
-        $articleCollection = \Maleficarum\Ioc\Container::get(\Data\Article\Collection::class);
+        $articleCollection = \Maleficarum\Ioc\Container::get(\Data\Article\ArticleCollection::class);
         $this->articleCollectionRepository->populate($articleCollection, $parameters);
 
         return $articleCollection;
@@ -90,17 +81,17 @@ class Manager {
      */
     public function assignToCategories($articleId, $categoryIds) {
         $article = $this->articleCrudManager->read($articleId);
-        $articleToCategoryCollection = \Maleficarum\Ioc\Container::get(\Data\ArticleToCategory\Collection::class);
+        $articleToCategoryCollection = \Maleficarum\Ioc\Container::get(\Data\ArticleToCategory\ArticleToCategoryCollection::class);
         $parameters = [
             'mapArticleCategoryArticleId' => [$articleId]
         ];
 
-        $this->articleToCatoryCollectionRepository->populate($articleToCategoryCollection, $parameters);
+        $this->articleToCategoryCollectionRepository->populate($articleToCategoryCollection, $parameters);
 
         try {
-            $shard = $this->articleToCatoryCollectionRepository->getShard($articleToCategoryCollection);
+            $shard = $this->articleToCategoryCollectionRepository->getShard($articleToCategoryCollection);
             $shard->inTransaction() or $shard->beginTransaction();
-            $articleToCategoryCollection->count() > 0 and $this->articleToCatoryCollectionRepository->deleteAll($articleToCategoryCollection);
+            $articleToCategoryCollection->count() > 0 and $this->articleToCategoryCollectionRepository->deleteAll($articleToCategoryCollection);
 
             $data = [];
             \array_filter($categoryIds, function ($row) use (&$data, $article) {
@@ -111,7 +102,7 @@ class Manager {
             });
 
             $articleToCategoryCollection->clear()->setData($data);
-            $articleToCategoryCollection->count() > 0 and $this->articleToCatoryCollectionRepository->createAll($articleToCategoryCollection);
+            $articleToCategoryCollection->count() > 0 and $this->articleToCategoryCollectionRepository->createAll($articleToCategoryCollection);
 
             $shard->commit();
         } catch (\Exception $e) {
@@ -119,7 +110,6 @@ class Manager {
 
             throw $e;
         }
-
 
         return $articleToCategoryCollection;
     }

@@ -3,10 +3,7 @@ declare(strict_types=1);
 
 namespace Controller\Article\Crud;
 
-/**
- * This controller handles status reporting
- */
-class Controller extends \Maleficarum\Api\Controller\Generic {
+class CrudController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
@@ -17,10 +14,10 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
 
     /**
      * @param \Logic\Article\Crud\CrudManager $articleCrudManager
-     *
-     * @return Controller
+     * s
+     * @return CrudController
      */
-    public function setArticleCrudManager(\Logic\Article\Crud\CrudManager $articleCrudManager): Controller {
+    public function setArticleCrudManager(\Logic\Article\Crud\CrudManager $articleCrudManager): CrudController {
         $this->articleCrudManager = $articleCrudManager;
 
         return $this;
@@ -90,13 +87,12 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
      *
      * @return bool|mixed
      */
-    public function __remap(string $method) {
+    public function __remap(string $method): void {
         try {
             $action = $method . 'Action';
 
             /**
-             * Checking ACL code here
-             *
+             * Checking ACL
              * throw \Maleficarum\Exception\UnauthorizedException when user doesn't have access to action
              */
             if (\method_exists($this, $action)) {
@@ -117,7 +113,5 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
 
             throw new \Maleficarum\Exception\HttpException(500, 'Generic error - please check logfile for more information. Error nr: '. $e->errorId);
         }
-
-        return true;
     }
 }

@@ -3,10 +3,7 @@ declare(strict_types=1);
 
 namespace Controller\Article\Category;
 
-/**
- * This controller handles status reporting
- */
-class Controller extends \Maleficarum\Api\Controller\Generic {
+class CategoryController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
@@ -18,9 +15,9 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
     /**
      * @param \Logic\Article\ArticleManager $articleCrudManager
      *
-     * @return \Controller\Article\Controller
+     * @return $this
      */
-    public function setArticleManager(\Logic\Article\ArticleManager $articleManager): Controller {
+    public function setArticleManager(\Logic\Article\ArticleManager $articleManager): CategoryController {
         $this->articleManager = $articleManager;
 
         return $this;
@@ -29,9 +26,9 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
     /**
      * /article/{articleId}/categories
      *
-     * @return \Maleficarum\Response\AbstractResponse
-     *
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
+     *
+     * @return \Maleficarum\Response\AbstractResponse
      */
     public function assignAction(): \Maleficarum\Response\AbstractResponse {
         $articleId = $this->getIntegerParameter('articleId');
@@ -46,16 +43,13 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
 
     /**
      * @param string $method
-     *
-     * @return bool|mixed
      */
-    public function __remap(string $method) {
+    public function __remap(string $method): void {
         try {
             $action = $method . 'Action';
 
             /**
-             * Checking ACL code here
-             *
+             * Checking ACL
              * throw \Maleficarum\Exception\UnauthorizedException when user doesn't have access to action
              */
             if (\method_exists($this, $action)) {
@@ -74,7 +68,5 @@ class Controller extends \Maleficarum\Api\Controller\Generic {
 
             throw new \Maleficarum\Exception\HttpException(500, 'Generic error - please check logfile for more information. Error nr: ' . $e->errorId);
         }
-
-        return true;
     }
 }
