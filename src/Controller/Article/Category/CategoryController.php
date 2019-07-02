@@ -7,9 +7,7 @@ class CategoryController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
-    /**
-     * @var \Logic\Article\ArticleManager
-     */
+    /** @var \Logic\Article\ArticleManager */
     protected $articleManager;
 
     /**

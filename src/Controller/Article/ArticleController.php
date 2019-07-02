@@ -7,9 +7,7 @@ class ArticleController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
-    /**
-     * @var array
-     */
+    /** @var array  */
     protected static $sortMap = [
         'listAction' => [
             '-status' => [['articleStatus', 'DESC']],
@@ -21,9 +19,7 @@ class ArticleController extends \Maleficarum\Api\Controller\Generic {
         ]
     ];
 
-    /**
-     * @var \Logic\Article\ArticleManager
-     */
+    /** @var \Logic\Article\ArticleManager */
     protected $articleManager;
 
     /**

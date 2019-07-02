@@ -7,9 +7,7 @@ class CrudController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
-    /**
-     * @var \Logic\Article\Crud\CrudManager
-     */
+    /** @var \Logic\Article\Crud\CrudManager  */
     protected $articleCrudManager;
 
     /**
