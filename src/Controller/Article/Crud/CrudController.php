@@ -7,20 +7,6 @@ class CrudController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
-    /** @var \Logic\Article\Crud\CrudManager  */
-    protected $articleCrudManager;
-
-    /**
-     * @param \Logic\Article\Crud\CrudManager $articleCrudManager
-     * s
-     * @return CrudController
-     */
-    public function setArticleCrudManager(\Logic\Article\Crud\CrudManager $articleCrudManager): CrudController {
-        $this->articleCrudManager = $articleCrudManager;
-
-        return $this;
-    }
-
     /**
      * /articles
      *
