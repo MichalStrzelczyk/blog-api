@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Logic\Exception;
+namespace Process\Exception;
 
-class EntityValidationError extends \DomainException {
+class ValidationError extends \DomainException {
 
     /**
      * Error container

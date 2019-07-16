@@ -40,6 +40,6 @@ $app->map('/articles/{articleId:\d+}/categories', function ($articleId) use ($re
     $request->attachUrlParams(['articleId' => $articleId]);
 
     if ($request->isPut()) {
-        $controller->__remap('assign');
+        $controller->__remap('attach');
     }
 })->via(['PUT']);

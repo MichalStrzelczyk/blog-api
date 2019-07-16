@@ -27,12 +27,13 @@ class CrudController extends \Maleficarum\Api\Controller\Generic {
      * @return \Maleficarum\Response\AbstractResponse
      */
     public function createAction(): \Maleficarum\Response\AbstractResponse {
-        $article = $this->articleCrudManager->create($this->request->getParameters($this->request::METHOD_POST));
+        $process = \Maleficarum\Ioc\Container::get(\Process\Article\Crud\Create::class);
+        $response = $process->handle([
+            'articleData' => $this->request->getParameters($this->request::METHOD_POST)
+        ]);
 
         // Everything is correct
-        return $this->getResponse()->setStatusCode(201)->render([
-            $article->getDTO()
-        ]);
+        return $this->getResponse()->setStatusCode(201)->render($response->getData()['article']->getDTO());
     }
 
     /**
@@ -43,10 +44,12 @@ class CrudController extends \Maleficarum\Api\Controller\Generic {
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
      */
     public function readAction(): \Maleficarum\Response\AbstractResponse {
-        $articleId = $this->getIntegerParameter('articleId');
-        $article = $this->articleCrudManager->read($articleId);
+        $process = \Maleficarum\Ioc\Container::get(\Process\Article\Crud\Read::class);
+        $response = $process->handle([
+            'articleId' => $this->getIntegerParameter('articleId')
+        ]);
 
-        return $this->getResponse()->render($article->getDTO());
+        return $this->getResponse()->render($response->getData()['article']->getDTO());
     }
 
     /**
@@ -57,11 +60,13 @@ class CrudController extends \Maleficarum\Api\Controller\Generic {
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
      */
     public function updateAction(): \Maleficarum\Response\AbstractResponse {
-        $articleId = $this->getIntegerParameter('articleId');
-        $data = $this->getRequest()->getRawData();
-        $article = $this->articleCrudManager->update($articleId, $data);
+        $process = \Maleficarum\Ioc\Container::get(\Process\Article\Crud\Update::class);
+        $response = $process->handle([
+            'articleId' => $this->getIntegerParameter('articleId'),
+            'articleData' => $this->getRequest()->getRawData()
+        ]);
 
-        return $this->getResponse()->render($article->getDTO());
+        return $this->getResponse()->render($response->getData()['article']->getDTO());
     }
 
     /**
@@ -72,8 +77,10 @@ class CrudController extends \Maleficarum\Api\Controller\Generic {
      * @throws \Maleficarum\Storage\Exception\Repository\EntityNotFoundException
      */
     public function deleteAction(): \Maleficarum\Response\AbstractResponse {
-        $articleId = $this->getIntegerParameter('articleId');
-        $this->articleCrudManager->delete($articleId);
+        $process = \Maleficarum\Ioc\Container::get(\Process\Article\Crud\Delete::class);
+        $process->handle([
+            'articleId' => $this->getIntegerParameter('articleId')
+        ]);
 
         return $this->getResponse()->render([
             'statusMessage' => 'Article was successfully deleted'
@@ -100,7 +107,7 @@ class CrudController extends \Maleficarum\Api\Controller\Generic {
             }
         } catch (\Maleficarum\Storage\Exception\Repository\EntityNotFoundException $e) {
             $this->respondToNotFound($e->getMessage());
-        } catch (\Logic\Exception\EntityValidationError $e) {
+        } catch (\Process\Exception\ValidationError $e) {
             $this->respondToBadRequest($e->getErrorContainer());
         } catch (\Maleficarum\Exception\HttpException $e) {
             throw $e;

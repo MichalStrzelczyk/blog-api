@@ -7,28 +7,16 @@ class ArticleController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
-    /** @var array  */
-    protected static $sortMap = [
-        'listAction' => [
-            '-status' => [['articleStatus', 'DESC']],
-            '+status' => [['articleStatus', 'ASC']],
-            '-date' => [['articleCreatedDate', 'DESC']],
-            '+date' => [['articleCreatedDate', 'ASC']],
-            '-id' => [['articleId', 'DESC']],
-            '+id' => [['articleId', 'ASC']]
-        ]
-    ];
-
-    /** @var \Logic\Article\ArticleManager */
-    protected $articleManager;
+    /** @var \Logic\QueryOptions */
+    protected $queryOptions;
 
     /**
-     * @param \Logic\Article\ArticleManager $articleCrudManager
+     * @param \Logic\QueryOptions $queryOptions
      *
-     * @return \Controller\Article\ArticleController
+     * @return ArticleController
      */
-    public function setArticleManager(\Logic\Article\ArticleManager $articleManager): ArticleController {
-        $this->articleManager = $articleManager;
+    public function setQueryOptions(\Logic\QueryOptions $queryOptions): ArticleController {
+        $this->queryOptions = $queryOptions;
 
         return $this;
     }
@@ -39,32 +27,16 @@ class ArticleController extends \Maleficarum\Api\Controller\Generic {
      * @return \Maleficarum\Response\AbstractResponse
      */
     public function listAction(): \Maleficarum\Response\AbstractResponse {
-        // Validation
-        $this->validatePagination();
-        $this->validateSorting('listAction');
-
-        $sort = $this->getRequest()->sort;
-        $status = $this->getRequest()->status;
-        $limit = $this->getIntegerParameter('limit');
-        $offset = $this->getIntegerParameter('offset');
-
-        // Filters
-        $filters = [];
-        if ($status  && !\in_array($status, ['0', '1'])) {
-            $this->addError('0001-000103', 'Invalid `status` parameter - unsupported value.');
-            $this->respondToBadRequest($this->getAllErrors());
-        } else {
-            $status and $filters['articleStatus'] = $status;
+        $this->queryOptions->populate($this->getRequest()->getParameters());
+        $errors = $this->queryOptions->validate();
+        if(\count($errors) > 0) {
+            throw new \Process\Exception\ValidationError($errors);
         }
 
-        $articles = $this->articleManager->list(
-            $limit,
-            $offset,
-            self::$sortMap['listAction'][$sort],
-            $filters
-        );
+        $process = \Maleficarum\Ioc\Container::get(\Process\Article\ReadAll::class);
+        $response = $process->handle(['queryOptions' => $this->queryOptions]);
 
-        return $this->getResponse()->render($articles->toArray());
+        return $this->getResponse()->render($response->getData());
     }
 
     /**
@@ -85,6 +57,8 @@ class ArticleController extends \Maleficarum\Api\Controller\Generic {
             }
         } catch (\Maleficarum\Storage\Exception\Repository\EntityNotFoundException $e) {
             $this->respondToNotFound($e->getMessage());
+        } catch (\Process\Exception\ValidationError $e) {
+            $this->respondToBadRequest($e->getErrorContainer());
         } catch (\Maleficarum\Exception\HttpException $e) {
             throw $e;
         } catch (\Exception $e) {

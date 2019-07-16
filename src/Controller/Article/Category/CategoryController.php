@@ -7,20 +7,6 @@ class CategoryController extends \Maleficarum\Api\Controller\Generic {
     use \Maleficarum\Logger\Dependant;
     use \Controller\HttpErrorFormatterTrait;
 
-    /** @var \Logic\Article\ArticleManager */
-    protected $articleManager;
-
-    /**
-     * @param \Logic\Article\ArticleManager $articleCrudManager
-     *
-     * @return $this
-     */
-    public function setArticleManager(\Logic\Article\ArticleManager $articleManager): CategoryController {
-        $this->articleManager = $articleManager;
-
-        return $this;
-    }
-
     /**
      * /article/{articleId}/categories
      *
@@ -28,11 +14,15 @@ class CategoryController extends \Maleficarum\Api\Controller\Generic {
      *
      * @return \Maleficarum\Response\AbstractResponse
      */
-    public function assignAction(): \Maleficarum\Response\AbstractResponse {
+    public function attachAction(): \Maleficarum\Response\AbstractResponse {
         $articleId = $this->getIntegerParameter('articleId');
         $categoryIds = $this->getRequest()->getRawData()['categoryIds'];
 
-        $this->articleManager->assignToCategories($articleId, $categoryIds);
+        $process = \Maleficarum\Ioc\Container::get(\Process\Article\AttachToCategories::class);
+        $process->handle([
+            'articleId' => $articleId,
+            'categoryIds' => $categoryIds
+        ]);
 
         return $this->getResponse()->render([
             'statusMessage' => 'Article was successfully assigned to categories'

@@ -17,8 +17,8 @@ $app = \Maleficarum\Ioc\Container::get('Phalcon\Mvc\Micro');
 $app->getRouter()->setUriSource(\Phalcon\Mvc\Router::URI_SOURCE_SERVER_REQUEST_URI);
 
 // Add namespaces for IOC
+\Maleficarum\Ioc\Container::addNamespace('Process', SRC_PATH . '/Ioc');
 \Maleficarum\Ioc\Container::addNamespace('Controller', SRC_PATH . '/Ioc');
-\Maleficarum\Ioc\Container::addNamespace('Logic', SRC_PATH . '/Ioc');
 \Maleficarum\Ioc\Container::addNamespace('Repository', SRC_PATH . '/Ioc');
 
 // create the bootstrap object and run internal init
