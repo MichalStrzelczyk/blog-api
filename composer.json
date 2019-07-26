@@ -1,0 +1,17 @@
+{
+    "name": "miinto/blog-api",
+    "description": "Miinto blog - API",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "maleficarum/api": "^13.1",
+        "maleficarum/logger": "^3.0",
+        "maleficarum/profiler": "^5.0",
+        "maleficarum/storage": "^3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    }
+}
